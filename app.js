@@ -13,34 +13,45 @@ const Postagem = mongoose.model("postagens")
 require("./models/Categoria")
 const Categoria = mongoose.model("categorias")
 const usuarios = require("./routes/usuario")
+const passport = require("passport")
+require("./config/auth")(passport)
     // Configurações
     // Sessão
 app.use(session({
-    secret: "seceretnodejs",
+    secret: "secretnodejs",
     resave: true,
     saveUninitialized: true
 }))
+
+app.use(passport.initialize())
+app.use(passport.session())
 app.use(flash())
-    // Middleware
+
+// Middleware
 app.use((req, res, next) => {
-        res.locals.success_msg = req.flash("success_msg")
-        res.locals.error_msg = req.flash("error_msg")
-        next()
-    })
-    // Body Parser
+    res.locals.success_msg = req.flash("success_msg")
+    res.locals.error_msg = req.flash("error_msg")
+    res.locals.error = req.flash("error")
+    next()
+})
+
+// Body Parser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-    // Handlebars
+
+// Handlebars
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
-    // Mongoose
+
+// Mongoose
 mongoose.Promise = global.Promise
 mongoose.connect('mongodb://localhost/blogapp').then(() => {
-        console.log("Conectado ao mongo")
-    }).catch((err) => {
-        console.log("Erro ao se conectar: " + err)
-    })
-    // Public
+    console.log("Conectado ao mongo")
+}).catch((err) => {
+    console.log("Erro ao se conectar: " + err)
+})
+
+// Public
 app.use(express.static(path.join(__dirname, "public")))
 
 // Rotas
